@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # ProductiveSpace 🚀
 
 A modern, feature-rich productivity application that combines task management, note-taking, and digital drawing in one beautiful interface.
@@ -214,3 +215,6 @@ If you encounter any issues or have questions:
 **Made with ❤️ for productivity enthusiasts**
 
 *Transform your workflow with ProductiveSpace - where tasks, notes, and creativity unite!*
+=======
+# VibeCoding_ProductiveSpace
+>>>>>>> 15785295d917e447e8c0b7756132e8f7de71dd6e
