@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Threads</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- RoughJS Library for Authentic Excalidraw Hand-drawn Look -->
+    <script src="https://unpkg.com/roughjs@4.5.2/bundled/rough.js"></script>
+    <!-- iOS 17 San Francisco Font System -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&display=swap');
+        
+        /* iOS 17 San Francisco Font Definitions */
+        @font-face {
+            font-family: 'SF Pro Display';
+            src: local('SF Pro Display'), local('SFProDisplay-Regular');
+            font-weight: 400;
+            font-style: normal;
+        }
+        
+        @font-face {
+            font-family: 'SF Pro Text';
+            src: local('SF Pro Text'), local('SFProText-Regular');
+            font-weight: 400;
+            font-style: normal;
+        }
+        
+        /* iOS 17 Font System Variables */
+        :root {
+            --ios-font-display: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            --ios-font-text: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            --ios-font-mono: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Courier New', monospace;
+            
+            /* iOS 17 Typography Scale */
+            --ios-large-title: 34px;
+            --ios-title-1: 28px;
+            --ios-title-2: 22px;
+            --ios-title-3: 20px;
+            --ios-headline: 17px;
+            --ios-body: 17px;
+            --ios-callout: 16px;
+            --ios-subhead: 15px;
+            --ios-footnote: 13px;
+            --ios-caption-1: 12px;
+            --ios-caption-2: 11px;
+            
+            /* iOS 17 Line Heights */
+            --ios-line-height-tight: 1.2;
+            --ios-line-height-normal: 1.38;
+            --ios-line-height-relaxed: 1.47;
+            
+            /* iOS 17 Letter Spacing */
+            --ios-tracking-tight: -0.408px;
+            --ios-tracking-normal: -0.374px;
+            --ios-tracking-loose: -0.24px;
+        }
+    </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="water-bg"></div>
+    
+    <!-- Floating tasks display removed - tasks now show directly in Tasks tab -->
+    
+    <!-- Tasks toggle button removed - tasks now show directly -->
+    
+    <div class="container">
+        <header>
+            <div class="header-mobile-top">
+            <div class="app-title">
+                <div class="app-icon">
+                    <i class="fas fa-layer-group"></i>
+                </div>
+                <h1>ProductiveSpace</h1>
+            </div>
+            
+            <div class="header-user-section">
+                <button class="settings-btn" onclick="showWelcomeModal()" title="Change Profile">
+                    <i class="fas fa-cog"></i>
+                </button>
+                <div class="user-info" id="userInfo" onclick="showUserStats()">
+                    <div class="user-avatar" id="headerAvatar">🦊</div>
+                    <div class="user-name" id="headerUserName">User</div>
+                </div>
+                </div>
+            </div>
+            
+            <div class="app-switcher">
+                <button class="app-tab active" data-app="todo" onclick="switchApp('todo')">
+                    <span>Tasks</span>
+                </button>
+                <button class="app-tab" data-app="notes" onclick="switchApp('notes')">
+                    <span>Notes</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- To-Do App Content -->
+        <div id="todoApp" class="app-content active">
+            <div class="app-header">
+                <h2><i class="fas fa-tasks"></i> Task Manager</h2>
+                <p>Organize your threads and boost productivity</p>
+            </div>
+            <!-- Move all existing todo content here -->
+            <div class="thread-input-section">
+                <div class="input-container">
+                    <div class="thread-counter">
+                        <i class="fas fa-thread"></i>
+                        <span id="threadCounter">Thread #1</span>
+                        <button class="voice-btn" onclick="startVoiceInput()" title="Voice Input">
+                            <i class="fas fa-microphone" id="voiceIcon"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="input-wrapper">
+                        <div class="main-input-row">
+                            <input type="text" id="todoInput" placeholder="What's weaving through your mind?" maxlength="200">
+                            <button id="addBtn" onclick="addTodo()">
+                                <div class="btn-content">
+                                    <i class="fas fa-plus"></i>
+                                    <span>Weave</span>
+                                </div>
+                            </button>
+                        </div>
+                        <div class="input-controls">
+                            <select id="categorySelect" class="category-select">
+                                <option value="personal">📋 Personal</option>
+                                <option value="work">💼 Work</option>
+                                <option value="health">🏃 Health</option>
+                                <option value="learning">📚 Learning</option>
+                                <option value="creative">🎨 Creative</option>
+                                <option value="social">👥 Social</option>
+                            </select>
+                            <select id="prioritySelect" class="priority-select">
+                                <option value="low">🔵 Low Priority</option>
+                                <option value="medium">🟡 Medium Priority</option>
+                                <option value="high">🔴 High Priority</option>
+                            </select>
+                            <input type="text" id="tagsInput" placeholder="Tags (comma separated)" class="tags-input">
+                        </div>
+                    </div>
+
+                    <div class="advanced-options">
+                        <div class="quick-templates">
+                            <span class="template-label">Quick templates:</span>
+                            <button class="template-btn" onclick="setTemplate('🎯 Goal: ')">Goal</button>
+                            <button class="template-btn" onclick="setTemplate('💡 Idea: ')">Idea</button>
+                            <button class="template-btn" onclick="setTemplate('📋 Task: ')">Task</button>
+                            <button class="template-btn" onclick="setTemplate('🎨 Creative: ')">Creative</button>
+                        </div>
+                        
+                        <div class="recurring-options">
+                            <label>
+                                <input type="checkbox" id="recurringCheck"> 
+                                Recurring thread
+                            </label>
+                            <select id="recurringInterval" disabled>
+                                <option value="daily">Daily</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="monthly">Monthly</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="thread-stats">
+                <div class="stat clickable-stat" onclick="showAllTasks()">
+                    <div class="stat-icon">
+                        <i class="fas fa-stream"></i>
+                    </div>
+                    <span class="stat-number" id="totalTasks">0</span>
+                    <span class="stat-label">Total Threads</span>
+                </div>
+                <div class="stat">
+                    <div class="stat-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <span class="stat-number" id="completedTasks">0</span>
+                    <span class="stat-label">Completed</span>
+                </div>
+                <div class="stat">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <span class="stat-number" id="pendingTasks">0</span>
+                    <span class="stat-label">In Progress</span>
+                </div>
+            </div>
+
+            <div class="task-controls">
+                <!-- Row 1: Status Filters -->
+                <div class="control-row">
+                    <button class="control-btn active" onclick="showAll()">
+                        <span>📋 All Tasks</span>
+                    </button>
+                    <button class="control-btn" onclick="showPending()">
+                        <span>⏳ In Progress</span>
+                    </button>
+                    <button class="control-btn" onclick="showCompleted()">
+                        <span>✅ Completed</span>
+                    </button>
+                    <button class="control-btn" onclick="showByPriority('high')">
+                        <span>🔥 High Priority</span>
+                    </button>
+                    <button class="control-btn" onclick="showOverdue()">
+                        <span>⚠️ Overdue</span>
+                    </button>
+                </div>
+                
+                <!-- Row 2: Categories -->
+                <div class="control-row">
+                    <button class="control-btn active" onclick="filterByCategory('all')">
+                        <span>🏠 All Categories</span>
+                    </button>
+                    <button class="control-btn" onclick="filterByCategory('personal')">
+                        <span>👤 Personal</span>
+                    </button>
+                    <button class="control-btn" onclick="filterByCategory('work')">
+                        <span>💼 Work</span>
+                    </button>
+                    <button class="control-btn" onclick="filterByCategory('health')">
+                        <span>🏃 Health</span>
+                    </button>
+                    <button class="control-btn" onclick="filterByCategory('learning')">
+                        <span>📚 Learning</span>
+                    </button>
+                </div>
+                
+                <!-- Row 3: More Categories & Views -->
+                <div class="control-row">
+                    <button class="control-btn" onclick="filterByCategory('creative')">
+                        <span>🎨 Creative</span>
+                    </button>
+                    <button class="control-btn" onclick="filterByCategory('social')">
+                        <span>👥 Social</span>
+                    </button>
+                    <button class="control-btn" onclick="toggleAnalytics()">
+                        <span>📊 Analytics</span>
+                    </button>
+                    <button class="control-btn" onclick="bulkMode()">
+                        <span>📦 Bulk Edit</span>
+                    </button>
+                    <button class="control-btn" onclick="exportAllData()">
+                        <span>💾 Export</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Analytics Dashboard -->
+            <div id="analyticsPanel" class="analytics-panel hidden">
+                <div class="analytics-header">
+                    <h3>Productivity Analytics</h3>
+                    <button onclick="toggleAnalytics()" class="close-analytics">×</button>
+                </div>
+                <div class="analytics-grid">
+                    <div class="stat-card">
+                        <h4>This Week</h4>
+                        <div class="big-number" id="weeklyCompleted">0</div>
+                        <p>Threads Completed</p>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Best Day</h4>
+                        <div class="big-number" id="bestDay">—</div>
+                        <p>Most Productive</p>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Avg. Time</h4>
+                        <div class="big-number" id="avgTime">—</div>
+                        <p>Per Thread</p>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Category</h4>
+                        <div class="big-number" id="topCategory">📋</div>
+                        <p>Most Used</p>
+                    </div>
+                </div>
+                <div class="progress-chart">
+                    <h4>Weekly Progress</h4>
+                    <div class="chart-container">
+                        <div class="chart-bars" id="weeklyChart">
+                            <!-- Chart bars will be generated -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Task Actions - Moved Outside Container -->
+            <div class="list-actions">
+                <button class="action-btn" onclick="showAllTasksInList()">
+                    <i class="fas fa-list"></i>
+                    Show All Tasks
+                </button>
+                <button class="action-btn" onclick="bulkMode()">
+                    <i class="fas fa-check-double"></i>
+                    Bulk Actions
+                </button>
+            </div>
+
+            <div id="bulkControls" class="bulk-controls hidden">
+                <div class="bulk-actions">
+                    <button onclick="selectAll()">Select All</button>
+                    <button onclick="bulkComplete()">Complete Selected</button>
+                    <button onclick="bulkDelete()">Delete Selected</button>
+                    <button onclick="bulkSetPriority()">Set Priority</button>
+                    <button onclick="exitBulkMode()">Exit</button>
+                </div>
+            </div>
+
+            <!-- Task List Header -->
+            <div class="task-list-header">
+                <h3 id="taskListTitle"><i class="fas fa-tasks"></i> All Tasks</h3>
+                <div class="task-count-info">
+                    <span id="currentTaskCount">0</span> tasks shown
+                </div>
+            </div>
+
+            <ul id="todoList" class="thread-list">
+                <!-- Threads will be dynamically added here -->
+            </ul>
+            <div id="emptyState" class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-seedling"></i>
+                </div>
+                <!-- Empty state text removed -->
+            </div>
+
+
+
+            <!-- Smart Suggestions Section - Moved Outside Container -->
+            <div class="suggestions-section">
+                <h4>✨ Smart Suggestions</h4>
+                <div class="suggestions-grid">
+                    <div class="suggestion-item" onclick="setTemplate('🌅 Morning routine')">
+                        <i class="fas fa-sun"></i>
+                        <span>Start your morning routine</span>
+                    </div>
+                    <div class="suggestion-item" onclick="setTemplate('💧 Drink water')">
+                        <i class="fas fa-tint"></i>
+                        <span>Stay hydrated</span>
+                    </div>
+                    <div class="suggestion-item" onclick="setTemplate('📖 Read for 20 minutes')">
+                        <i class="fas fa-book"></i>
+                        <span>Read something inspiring</span>
+                    </div>
+                    <div class="suggestion-item" onclick="setTemplate('🏃 Exercise for 30 minutes')">
+                        <i class="fas fa-running"></i>
+                        <span>Get some exercise</span>
+                    </div>
+                    <div class="suggestion-item" onclick="setTemplate('🧘 Meditate for 10 minutes')">
+                        <i class="fas fa-leaf"></i>
+                        <span>Practice mindfulness</span>
+                    </div>
+                    <div class="suggestion-item" onclick="setTemplate('💻 Work on main project')">
+                        <i class="fas fa-laptop"></i>
+                        <span>Focus on important work</span>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+
+        <!-- Notes App Content -->
+        <div id="notesApp" class="app-content notes-app">
+            <div class="app-header">
+                <h2><i class="fas fa-sticky-note"></i> Notes Studio</h2>
+                <p>Capture ideas with Google Keep-style notes</p>
+            </div>
+            <div class="notes-header">
+                <div class="notes-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search your notes..." id="notesSearch">
+                </div>
+                <button class="new-note-btn" onclick="createNote()">
+                    <i class="fas fa-plus"></i>
+                    New Note
+                </button>
+            </div>
+            
+            <!-- Note Templates Section -->
+            <div class="note-templates-section">
+                <h4>📝 Quick Templates</h4>
+                <div class="template-grid">
+                    <button class="template-card" onclick="createNoteFromTemplate('diary')">
+                        <div class="template-icon">📔</div>
+                        <div class="template-info">
+                            <h5>Daily Diary</h5>
+                            <p>Record your daily thoughts</p>
+                        </div>
+                    </button>
+                    <button class="template-card" onclick="createNoteFromTemplate('journal')">
+                        <div class="template-icon">📓</div>
+                        <div class="template-info">
+                            <h5>Journal Entry</h5>
+                            <p>Reflect on your experiences</p>
+                        </div>
+                    </button>
+                    <button class="template-card" onclick="createNoteFromTemplate('meeting')">
+                        <div class="template-icon">📋</div>
+                        <div class="template-info">
+                            <h5>Meeting Notes</h5>
+                            <p>Capture important discussions</p>
+                        </div>
+                    </button>
+                    <button class="template-card" onclick="createNoteFromTemplate('ideas')">
+                        <div class="template-icon">💡</div>
+                        <div class="template-info">
+                            <h5>Ideas & Brainstorm</h5>
+                            <p>Creative thoughts and concepts</p>
+                        </div>
+                    </button>
+                    <button class="template-card" onclick="createNoteFromTemplate('todo')">
+                        <div class="template-icon">✅</div>
+                        <div class="template-info">
+                            <h5>Todo List</h5>
+                            <p>Tasks and reminders</p>
+                        </div>
+                    </button>
+                    <button class="template-card" onclick="createNoteFromTemplate('gratitude')">
+                        <div class="template-icon">🙏</div>
+                        <div class="template-info">
+                            <h5>Gratitude Log</h5>
+                            <p>Things you're thankful for</p>
+                        </div>
+                    </button>
+                    <button class="template-card create-custom-template" onclick="showCustomTemplateModal()">
+                        <div class="template-icon">➕</div>
+                        <div class="template-info">
+                            <h5>Create Custom</h5>
+                            <p>Design your own template</p>
+                        </div>
+                    </button>
+                </div>
+                
+                <!-- Custom Templates Section -->
+                <div id="customTemplatesSection" class="custom-templates-section hidden">
+                    <h4>🎨 Your Custom Templates</h4>
+                    <div class="custom-template-grid" id="customTemplateGrid">
+                        <!-- Custom templates will be dynamically added here -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="notes-grid" id="notesGrid">
+                <!-- Notes will be dynamically added here -->
+            </div>
+            
+            <!-- Note Editor Modal -->
+            <div id="noteEditorModal" class="note-editor-modal hidden" aria-modal="true" role="dialog">
+                <div class="note-editor-content">
+                    <div class="note-editor-header">
+                        <button class="note-close" onclick="closeNoteEditor()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <div class="note-actions">
+                            <button onclick="addImage()" title="Add Image"><i class="fas fa-image"></i></button>
+                            <button onclick="formatText('bold')" title="Bold"><i class="fas fa-bold"></i></button>
+                            <button onclick="formatText('italic')" title="Italic"><i class="fas fa-italic"></i></button>
+                            <button onclick="formatText('underline')" title="Underline"><i class="fas fa-underline"></i></button>
+                            <button onclick="autoCorrectNote()" title="Auto-correct & Grammar Check (Ctrl+K)" class="auto-correct-btn"><i class="fas fa-spell-check"></i></button>
+                            <button onclick="saveCurrentNote(true)" title="Save Note (Ctrl+S)" class="save-note-btn"><i class="fas fa-save"></i></button>
+                            <button onclick="deleteCurrentNote()" title="Delete Note"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                    <input type="text" id="noteTitle" placeholder="✨ Give your note a catchy title..." class="note-title-input">
+                    <div id="noteContent" contenteditable="true" class="note-content-area" data-placeholder="💭 Pour your emotions, ideas, and thoughts here... Let your creativity flow!"></div>
+            </div>
+        </div>
+
+            <!-- Custom Template Creator Modal -->
+            <div id="customTemplateModal" class="custom-template-modal hidden" aria-modal="true" role="dialog">
+                <div class="custom-template-content">
+                    <div class="custom-template-header">
+                        <h3>🎨 Create Your Custom Template</h3>
+                        <button class="template-close" onclick="closeCustomTemplateModal()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="custom-template-form">
+                        <div class="form-group">
+                            <label for="templateName">Template Name:</label>
+                            <input type="text" id="templateName" placeholder="e.g., Weekly Review, Project Notes..." maxlength="30">
+                    </div>
+                        <div class="form-group">
+                            <label for="templateIcon">Choose Icon:</label>
+                            <div class="icon-selector">
+                                <button type="button" class="icon-option" data-icon="📝" onclick="selectTemplateIcon('📝')">📝</button>
+                                <button type="button" class="icon-option" data-icon="💼" onclick="selectTemplateIcon('💼')">💼</button>
+                                <button type="button" class="icon-option" data-icon="🎯" onclick="selectTemplateIcon('🎯')">🎯</button>
+                                <button type="button" class="icon-option" data-icon="🌟" onclick="selectTemplateIcon('🌟')">🌟</button>
+                                <button type="button" class="icon-option" data-icon="📊" onclick="selectTemplateIcon('📊')">📊</button>
+                                <button type="button" class="icon-option" data-icon="🎨" onclick="selectTemplateIcon('🎨')">🎨</button>
+                                <button type="button" class="icon-option" data-icon="🔬" onclick="selectTemplateIcon('🔬')">🔬</button>
+                                <button type="button" class="icon-option" data-icon="🏠" onclick="selectTemplateIcon('🏠')">🏠</button>
+                                <button type="button" class="icon-option" data-icon="💡" onclick="selectTemplateIcon('💡')">💡</button>
+                                <button type="button" class="icon-option" data-icon="📚" onclick="selectTemplateIcon('📚')">📚</button>
+                                <button type="button" class="icon-option" data-icon="🎵" onclick="selectTemplateIcon('🎵')">🎵</button>
+                                <button type="button" class="icon-option" data-icon="🍳" onclick="selectTemplateIcon('🍳')">🍳</button>
+                    </div>
+                            <input type="hidden" id="selectedTemplateIcon" value="📝">
+                        </div>
+                        <div class="form-group">
+                            <label for="templateDescription">Description:</label>
+                            <input type="text" id="templateDescription" placeholder="Brief description of your template..." maxlength="50">
+                    </div>
+                        <div class="form-group">
+                            <label for="templateContent">Template Content:</label>
+                            <textarea id="templateContent" placeholder="Enter your template content here...&#10;&#10;You can use placeholders like:&#10;- [Date]&#10;- [Title]&#10;- [Your Name]&#10;&#10;Example:&#10;Date: [Date]&#10;Project: [Title]&#10;&#10;Goals:&#10;- &#10;- &#10;- &#10;&#10;Notes:&#10;" rows="10"></textarea>
+                    </div>
+                        <div class="template-actions">
+                            <button type="button" onclick="previewCustomTemplate()" class="preview-btn">
+                                <i class="fas fa-eye"></i> Preview
+                            </button>
+                            <button type="button" onclick="saveCustomTemplate()" class="save-template-btn">
+                                <i class="fas fa-save"></i> Save Template
+                            </button>
+                            <button type="button" onclick="closeCustomTemplateModal()" class="cancel-btn">
+                                Cancel
+                        </button>
+                    </div>
+                </div>
+                    </div>
+                    </div>
+                </div>
+                
+
+
+        <footer>
+            <div class="footer-content">
+                <p>Created by <strong>Mahesh</strong> © 2025 | All rights reserved</p>
+                <div class="footer-controls">
+                    <button onclick="openSettings()" class="footer-btn" title="Settings">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                    <button onclick="openAI()" class="footer-btn" title="AI Assistant">
+                        <i class="fas fa-robot"></i>
+                    </button>
+                    <button onclick="shareApp()" class="footer-btn" title="Share">
+                        <i class="fas fa-share"></i>
+                    </button>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Welcome Modal -->
+    <div id="welcomeModal" class="welcome-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-logo" id="modalLogo">
+                    <span id="selectedAvatarDisplay">🦊</span>
+                </div>
+                <h2>yo, welcome to your space! ✨</h2>
+                <p>let's make this totally yours fr</p>
+            </div>
+            <div class="modal-body">
+                <div class="name-input-container">
+                    <label for="userName">what should we call you?</label>
+                    <input type="text" id="userName" placeholder="your name or whatever you vibe with..." maxlength="50">
+                </div>
+                <div class="avatar-selection">
+                    <label>pick your main character energy:</label>
+                    <div class="avatar-options">
+                        <button class="avatar-btn" data-avatar="🦊" title="Fox Spirit - cunning & adaptable">🦊</button>
+                        <button class="avatar-btn" data-avatar="🐺" title="Wolf Pack - loyal & strong">🐺</button>
+                        <button class="avatar-btn" data-avatar="🦋" title="Butterfly - transformation & growth">🦋</button>
+                        <button class="avatar-btn" data-avatar="🐉" title="Dragon - powerful & mystical">🐉</button>
+                        <button class="avatar-btn" data-avatar="🦅" title="Eagle - vision & freedom">🦅</button>
+                        <button class="avatar-btn" data-avatar="🐱" title="Cat - independent & curious">🐱</button>
+                        <button class="avatar-btn" data-avatar="🌸" title="Cherry Blossom - beauty & renewal">🌸</button>
+                        <button class="avatar-btn" data-avatar="⚡" title="Lightning - energy & speed">⚡</button>
+                        <button class="avatar-btn" data-avatar="🌙" title="Moon - intuition & mystery">🌙</button>
+                        <button class="avatar-btn" data-avatar="⭐" title="Star - guidance & dreams">⭐</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="startJourney" onclick="startUserJourney()">
+                    <i class="fas fa-rocket"></i>
+                    let's gooo! 🚀
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Celebration Modal -->
+    <div id="celebrationModal" class="celebration-modal hidden">
+        <div class="celebration-content">
+            <div class="celebration-animation">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+            </div>
+            <h3>Thread Completed!</h3>
+            <p id="celebrationMessage">Amazing work!</p>
+            <div class="xp-reward">
+                <span class="xp-gain">+<span id="xpGained">10</span> XP</span>
+            </div>
+            <button onclick="closeCelebration()">Continue Weaving</button>
+        </div>
+    </div>
+
+    <!-- Achievement Modal -->
+    <div id="achievementModal" class="achievement-modal hidden">
+        <div class="achievement-content">
+            <div class="achievement-badge">
+                <i class="fas fa-trophy"></i>
+            </div>
+            <h3>Achievement Unlocked!</h3>
+            <h4 id="achievementTitle">First Thread</h4>
+            <p id="achievementDesc">You've completed your first thread!</p>
+            <div class="achievement-reward">
+                <span>+50 XP Bonus</span>
+            </div>
+            <button onclick="closeAchievement()">Awesome!</button>
+        </div>
+    </div>
+
+    <!-- Time Tracking Modal -->
+    <div id="timerModal" class="timer-modal hidden">
+        <div class="timer-content">
+            <h3>Thread Timer</h3>
+            <div class="timer-display">
+                <span id="timerTime">00:00:00</span>
+            </div>
+            <div class="timer-controls">
+                <button onclick="startTimer()" id="startTimerBtn">
+                    <i class="fas fa-play"></i> Start
+                </button>
+                <button onclick="pauseTimer()" id="pauseTimerBtn" disabled>
+                    <i class="fas fa-pause"></i> Pause
+                </button>
+                <button onclick="stopTimer()" id="stopTimerBtn" disabled>
+                    <i class="fas fa-stop"></i> Stop
+                </button>
+            </div>
+            <div class="timer-thread">
+                <p>Working on: <strong id="timerThreadText">—</strong></p>
+            </div>
+            <button onclick="closeTimer()" class="close-timer">×</button>
+        </div>
+    </div>
+
+    <!-- Sub-threads Modal -->
+    <div id="subThreadModal" class="sub-thread-modal hidden">
+        <div class="sub-thread-content">
+            <div class="sub-thread-header">
+                <h3>Break it down</h3>
+                <p>Split this thread into smaller steps</p>
+                <button onclick="closeSubThreadModal()" class="close-sub">×</button>
+            </div>
+            <div class="parent-thread">
+                <strong id="parentThreadText">Main Thread</strong>
+            </div>
+            <div class="sub-thread-input">
+                <input type="text" id="subThreadInput" placeholder="Add a sub-thread..." maxlength="100">
+                <button onclick="addSubThread()">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+            <ul id="subThreadList" class="sub-thread-list">
+                <!-- Sub-threads will be added here -->
+            </ul>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="settings-modal hidden">
+        <div class="settings-content">
+            <div class="settings-header">
+                <h3>Settings</h3>
+                <button onclick="closeSettings()" class="close-settings">×</button>
+            </div>
+            <div class="settings-section">
+                <h4>Notifications</h4>
+                <label class="setting-item">
+                    <input type="checkbox" id="enableNotifications"> 
+                    <span>Enable notifications</span>
+                </label>
+                <label class="setting-item">
+                    <input type="checkbox" id="soundEffects" checked> 
+                    <span>Sound effects</span>
+                </label>
+                <label class="setting-item">
+                    <input type="checkbox" id="hapticFeedback" checked> 
+                    <span>Haptic feedback</span>
+                </label>
+            </div>
+            <div class="settings-section">
+                <h4>Productivity</h4>
+                <label class="setting-item">
+                    <span>Daily goal:</span>
+                    <input type="number" id="dailyGoal" value="5" min="1" max="20">
+                    <span>threads</span>
+                </label>
+                <label class="setting-item">
+                    <input type="checkbox" id="autoCompleteRecurring"> 
+                    <span>Auto-create recurring threads</span>
+                </label>
+            </div>
+            <div class="settings-section">
+                <h4>Data</h4>
+                <button onclick="exportAllData()" class="settings-btn">Export All Data</button>
+                <button onclick="importData()" class="settings-btn">Import Data</button>
+                <button onclick="clearAllData()" class="settings-btn danger">Clear All Data</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Suggestions Modal -->
+    <div id="aiModal" class="ai-modal hidden">
+        <div class="ai-content">
+            <div class="ai-header">
+                <h3>🤖 AI Assistant</h3>
+                <button onclick="closeAI()" class="close-ai">×</button>
+            </div>
+            <div class="ai-suggestions">
+                <h4>Smart Suggestions for You</h4>
+                <div id="aiSuggestionsList">
+                    <!-- AI suggestions will be populated here -->
+                </div>
+            </div>
+            <div class="ai-insights">
+                <h4>Productivity Insights</h4>
+                <div id="aiInsights">
+                    <p>🔥 You're most productive in the afternoon!</p>
+                    <p>📈 Your work threads take an average of 45 minutes</p>
+                    <p>🎯 You complete 73% of your high priority threads</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Stats Modal -->
+    <div id="userStatsModal" class="modal user-stats-modal">
+        <div class="user-stats-content">
+            <div class="user-stats-header">
+                <div class="user-large-avatar" id="userLargeAvatar">🦊</div>
+                <h2 id="userStatsName">User</h2>
+                <button class="close-btn" onclick="closeUserStats()">×</button>
+            </div>
+            <div class="user-stats-grid">
+                <div class="stat-item">
+                    <div class="stat-icon">🏆</div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="userLevel">1</span>
+                        <span class="stat-label">Level</span>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">⭐</div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="userXP">0</span>
+                        <span class="stat-label">XP Points</span>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">🔥</div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="userStreak">0</span>
+                        <span class="stat-label">Day Streak</span>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="totalCompleted">0</span>
+                        <span class="stat-label">Completed</span>
+                    </div>
+                </div>
+            </div>
+            <div class="xp-progress">
+                <div class="progress-label">Your Journey to Mastery</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="xpProgress"></div>
+                </div>
+                <div class="progress-text" id="xpProgressText">0 / 100 XP</div>
+                <div class="motivation-message" id="motivationMessage">
+                    Keep weaving threads of productivity! 🌟
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
