@@ -1795,16 +1795,24 @@ footer strong {
 @media (max-width: 768px) {
     .welcome-modal {
         padding: 15px 10px;
-        align-items: flex-start !important;
+        align-items: center !important;
     }
     
     .modal-content {
-        max-width: 95%;
-        gap: 25px;
-        padding: 30px 15px;
-        min-height: 100vh;
-        justify-content: flex-start;
-        padding-top: 60px;
+        max-width: min(560px, 95%);
+        gap: 16px;
+        padding: 16px 14px;
+        min-height: 100dvh;
+        height: 100dvh;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        align-items: center;
+        justify-items: center;
+        justify-content: center;
+        padding-top: 32px;
+        overflow: hidden;
+        margin: 0 auto;
+        text-align: center;
     }
     
     .modal-logo {
@@ -1851,8 +1859,10 @@ footer strong {
     }
     
     .modal-body {
-        gap: 20px;
+        gap: 14px;
         width: 100%;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
     }
 }
 
@@ -1864,11 +1874,15 @@ footer strong {
     
     .modal-content {
         max-width: 98%;
-        gap: 20px;
-        padding: 20px 10px;
-        min-height: 100vh;
+        gap: 14px;
+        padding: 14px 10px;
+        min-height: 100dvh;
+        height: 100dvh;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
         justify-content: flex-start;
         padding-top: 40px;
+        overflow: hidden;
     }
     
     .modal-logo {
@@ -1929,7 +1943,16 @@ footer strong {
     }
     
     .modal-footer {
-        max-width: 280px;
+        position: sticky;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        max-width: 100%;
+        padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(8px);
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+        z-index: 100002;
     }
 }
 
@@ -3076,7 +3099,7 @@ body.light-mode .tags-input:hover {
 .app-content {
     display: none;
     width: 100%;
-    height: calc(100vh - 80px);
+    height: calc(100dvh - 80px);
     overflow-y: auto;
     overflow-x: hidden;
     scrollbar-width: none; /* Firefox */
@@ -3101,7 +3124,7 @@ body.light-mode .tags-input:hover {
     max-width: 800px;
     margin: 0 auto;
     padding: 20px;
-    height: calc(100vh - 80px);
+    height: calc(100dvh - 80px);
     overflow-y: auto;
     overflow-x: hidden;
     scrollbar-width: none; /* Firefox */
@@ -3114,7 +3137,7 @@ body.light-mode .tags-input:hover {
     max-width: 1000px;
     margin: 0 auto;
     padding: 20px;
-    height: calc(100vh - 80px);
+    height: calc(100dvh - 80px);
     overflow-y: auto;
     overflow-x: hidden;
     scrollbar-width: none; /* Firefox */
@@ -4960,7 +4983,7 @@ body.light-mode .tags-input:hover {
 /* Excalidraw-style Drawing Interface */
 .drawing-app {
     padding: 0 !important;
-    height: calc(100vh - 80px);
+    height: calc(100dvh - 80px);
     min-height: 700px;
     width: 100%;
     display: block;
@@ -8268,6 +8291,53 @@ body.dark-mode .canvas-workspace {
         -moz-user-select: text;
         -ms-user-select: text;
         user-select: text;
+    }
+}
+
+/* Welcome Modal Mobile Fix */
+@media (max-width: 768px) {
+    .welcome-modal {
+        width: 100dvw !important;
+        height: 100dvh !important;
+        padding: 12px !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding-top: calc(12px + env(safe-area-inset-top, 0px)) !important;
+        padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+    }
+    
+    .welcome-modal .modal-content {
+        max-width: min(560px, 96vw) !important;
+        width: 100% !important;
+        max-height: calc(100dvh - 24px) !important;
+        height: auto !important;
+        min-height: unset !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 16px !important;
+        padding: 16px 14px !important;
+        box-sizing: border-box !important;
+    }
+    
+    .welcome-modal .modal-footer {
+        position: sticky !important;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        backdrop-filter: blur(8px);
+        padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+        z-index: 100002;
+    }
+}
+
+@media (max-width: 480px) {
+    .welcome-modal .modal-content {
+        max-width: 98vw !important;
+        padding: 14px 10px !important;
+        max-height: calc(100dvh - 20px) !important;
     }
 }
 
